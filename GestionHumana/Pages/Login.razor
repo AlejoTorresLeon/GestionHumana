@@ -1,0 +1,51 @@
+﻿@page "/"
+@layout LoginLayout
+@using GestionHumana.DTOs
+@using System.Security.Claims
+@using GestionHumana.Extensiones
+@using Microsoft.AspNetCore.Components.Authorization
+@inject HttpClient httpClient
+@inject AuthenticationStateProvider autenticacionProvider
+@inject NavigationManager Navigation
+
+
+
+<MudGrid Spacing="0" Style="height: 100vh;">
+    <MudItem xs="9" sm="9" md="9" lg="9" xl="9" Style="display: flex; align-items: center; justify-content: center; padding:0px; margin:0px; border:0px; height: 100vh;">
+        <MudImage Src="images/fondologin.png" Style="width: 100%; height: 100%; object-fit: cover;"/>
+    </MudItem>
+    <MudItem xs="3" sm="3" md="3" lg="3" xl="3">       
+        <MudCard>
+            <MudCardHeader>       
+                <MudImage Src="images/atowerslogo.jpg" Style="width: 70%; height: 100%;align-items: center; justify-content: center; " />
+            </MudCardHeader>
+            <MudCardHeader>
+                <MudText Typo="Typo.h5" Class="text-center">Iniciar sesión</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTextField Label="Correo electrónico" Variant="Variant.Outlined" @bind-Value="login.Correo" FullWidth />                
+                <MudTextField Label="Contraseña" Variant="Variant.Outlined" @bind-Value="login.Clave" Type="password" FullWidth />
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="IniciarSesion" FullWidth>Iniciar sesión</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private LoginDTO login = new LoginDTO();
+
+    private async Task IniciarSesion()
+    {
+        var loginResponse = await httpClient.PostAsJsonAsync<LoginDTO>("http://localhost:3006/api/Usuario/Login", login);
+        if (loginResponse.IsSuccessStatusCode)
+        {
+            var sesionUsuario = await loginResponse.Content.ReadFromJsonAsync<SesionDTO>();
+            var autenticacionExitosa = (AutenticacionExtension)autenticacionProvider;
+            await autenticacionExitosa.ActualizarEstadoAutenticacion(sesionUsuario);
+
+            Navigation.NavigateTo("/home");
+        }
+    }
+}

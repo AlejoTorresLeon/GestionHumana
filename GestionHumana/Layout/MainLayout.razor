@@ -1,0 +1,51 @@
+﻿@inherits LayoutComponentBase
+@using GestionHumana.Style
+@using MudBlazor
+@using GestionHumana.Extensiones
+@using Microsoft.AspNetCore.Components.Authorization
+@inject HttpClient httpClient
+@inject AuthenticationStateProvider autenticacionProvider
+@inject NavigationManager Navigation
+
+
+
+<MudThemeProvider Theme="MyCustomTheme.Theme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1" Class="d-flex justify-content-between">
+        <div class="d-flex justify-content-start">
+            <MudText Typo="Typo.h5" Class="ms-2">Gestion Humana</MudText>
+        </div>
+        <div class="d-flex justify-content-end ml-auto">            
+            <MudLink Color="Color.Default" Style="color: white;" Underline="Underline.None" OnClick="CerrarSesion">Salir</MudLink>
+        </div>    
+    </MudAppBar>
+    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+        <NavMenu />
+    </MudDrawer>
+    <MudMainContent Class="mt-16 pa-4">
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+
+
+
+
+@code {
+    private bool _drawerOpen = true;
+
+    private void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private async Task CerrarSesion()
+    {
+        var autenticacionExt = (AutenticacionExtension)autenticacionProvider;
+        await autenticacionExt.ActualizarEstadoAutenticacion(null);
+        Navigation.NavigateTo("/", true);
+    }
+}
